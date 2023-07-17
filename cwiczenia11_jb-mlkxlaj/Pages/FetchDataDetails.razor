@@ -1,0 +1,69 @@
+﻿@page "/student/{Id:int}"
+@using Zadanie11.Data
+@inject StudentService StudentService
+@inject NavigationManager NavigationManager
+<h3>
+    <u>Student's details</u>
+</h3>
+<div class="container text-center">
+    <div class="row mb-3">
+        <div class="col">
+            <label class="row">
+                First name:
+                <input class="form-control" type="text" value="@_student.FirstName" readonly>
+            </label>
+
+            <label class="row">
+                Last name:
+                <input class="form-control" type="text" value="@_student.LastName" readonly>
+            </label>
+
+            <label class="row">
+                Birth date:
+                <input class="form-control" type="text" value="@_student.BirthDate" readonly>
+            </label>
+
+            <label class="row">
+                Studies:
+                <input class="form-control" type="text" value="@_student.Studies" readonly>
+            </label>
+        </div>
+
+        <div class="col">
+            <label>
+                <img src="@_student.Icon" alt="Avatar" class="mb-3" style="max-width: 500px; max-height: 500px;">
+                <input class="form-control" type="text" value="@_student.Icon" readonly>
+            </label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col text-left">
+            <button class="btn btn-primary" style="float: left;" @onclick=@(() => ReturnToStudents())>Return</button>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Student? _student;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStudentDetails();
+    }
+
+    private async Task LoadStudentDetails()
+    {
+        _student = await StudentService.GetStudentById(Id);
+    }
+
+    private void ReturnToStudents()
+    {
+        NavigationManager.NavigateTo("/students", true);
+    }
+
+}

@@ -1,0 +1,98 @@
+﻿@page "/students"
+@using Zadanie11.Data
+@inject StudentService StudentService
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+<PageTitle>Students</PageTitle>
+
+<h1>Students</h1>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Avatar</th>
+        <th @onclick=@(() => Sort("FirstName"))>First name</th>
+        <th @onclick=@(() => Sort("LastName"))>Last name</th>
+        <th @onclick=@(() => Sort("Birthdate"))>Birth date</th>
+        <th @onclick=@(() => Sort("Studies"))>Studies</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var student in GetSortedStudents())
+    {
+        <tr>
+            <td>
+                <img src="@student.Icon">
+            </td>
+            <td>@student.FirstName</td>
+            <td>@student.LastName</td>
+            <td>@student.BirthDate</td>
+            <td>@student.Studies</td>
+            <td>
+                <button class="btn btn-primary" @onclick=@(() => NavigationManager.NavigateTo("/student/" + student.IdStudent))>Details</button>
+                <button class="btn btn-danger" @onclick=@(() => Delete(student.IdStudent))>Delete</button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    private IEnumerable<Student>? Students;
+    private string CurrentSortColumn;
+    private bool IsAscending = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Students = StudentService.GetStudents();
+    }
+
+    private IEnumerable<Student> GetSortedStudents()
+    {
+        if (Students == null)
+            return Enumerable.Empty<Student>();
+
+        if (CurrentSortColumn == "FirstName")
+        {
+            return IsAscending ? Students.OrderBy(s => s.FirstName) : Students.OrderByDescending(s => s.FirstName);
+        }
+        else if (CurrentSortColumn == "LastName")
+        {
+            return IsAscending ? Students.OrderBy(s => s.LastName) : Students.OrderByDescending(s => s.LastName);
+        }
+        else if (CurrentSortColumn == "Birthdate")
+        {
+            return IsAscending ? Students.OrderBy(s => s.BirthDate) : Students.OrderByDescending(s => s.BirthDate);
+        }
+        else if (CurrentSortColumn == "Studies")
+        {
+            return IsAscending ? Students.OrderBy(s => s.Studies) : Students.OrderByDescending(s => s.Studies);
+        }
+
+        return Students;
+    }
+
+
+    private void Sort(string name)
+    {
+        if (CurrentSortColumn == name)
+        {
+            IsAscending = !IsAscending;
+        }
+        else
+        {
+            CurrentSortColumn = name;
+            IsAscending = true;
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        if (await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete the student?"))
+        {
+            StudentService.DeleteStudent(id);
+        }
+    }
+
+}
